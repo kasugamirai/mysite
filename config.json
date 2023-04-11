@@ -1,0 +1,7 @@
+{
+	"database_driver": "sqlite3",
+	"database_dsn": "file::memory:?cache=shared",
+	"server": {
+		"port": "8080"
+	}
+}
