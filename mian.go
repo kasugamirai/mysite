@@ -21,9 +21,8 @@ func main() {
 
 	// Set up the Gin router
 	router := routes.SetupRouter()
-	s := config.Config{}
 	// Start the server
-	port := s.Server.Port
+	port := config.Instance.Server.Port
 	if port == "" {
 		port = "8080"
 	}
