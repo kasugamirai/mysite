@@ -34,7 +34,7 @@ func SetupRouter() *gin.Engine {
 		orderGroup.GET("/user/:userID", handlers.GetOrdersByUserIDHandler)
 		orderGroup.PUT("/:id", handlers.UpdateOrderHandler)
 		orderGroup.DELETE("/:id", handlers.DeleteOrderHandler)
-		orderGroup.GET("/:orderID/items", handlers.GetOrderItemsByOrderIDHandler)
+		orderGroup.GET("/items/:orderID", handlers.GetOrderItemsByOrderIDHandler)
 	}
 
 	return router

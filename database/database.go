@@ -14,11 +14,10 @@ var (
 // InitDB initializes the database connection.
 func InitDB() error {
 	var err error
-	dbConfig := config.Config{}
+	dbConfig := config.Instance.DatabaseDSN
 
 	// Create a new SQLite database connection.
-	dsn := dbConfig.DatabaseDSN
-	DB, err = gorm.Open(sqlite.Open(dsn), &gorm.Config{})
+	DB, err = gorm.Open(sqlite.Open(dbConfig), &gorm.Config{})
 	if err != nil {
 		return err
 	}

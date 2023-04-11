@@ -8,16 +8,17 @@ import (
 type Order struct {
 	gorm.Model
 	UserID     uint        `json:"user_id" gorm:"index:idx_user_OrderItems"`
-	OrderItems []OrderItem `json:"order_items" gorm:"index:idx_user_OrderItems"`
+	OrderItems []OrderItem `json:"order_items" gorm:"foreignKey:OrderID"`
 	TotalCost  float64     `json:"total_cost"`
 }
 
 type OrderItem struct {
 	gorm.Model
-	OrderID  uint    `json:"-"`
-	Product  Product `json:"-"`
-	Quantity int     `json:"quantity"`
-	Price    float64 `json:"price"`
+	OrderID   uint `json:"-"`
+	ProductID uint
+	Product   Product `json:"-"`
+	Quantity  int     `json:"quantity"`
+	Price     float64 `json:"price"`
 }
 
 // CreateOrder creates a new order in the database.
