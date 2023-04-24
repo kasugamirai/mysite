@@ -20,6 +20,7 @@ type Message struct {
 	Message  string `json:"message"`
 }
 
+// HandleConnections Connect To Server
 func HandleConnections(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
