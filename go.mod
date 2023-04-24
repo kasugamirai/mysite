@@ -2,7 +2,10 @@ module xy.com/mysite
 
 go 1.20
 
-require gorm.io/gorm v1.24.6
+require (
+	github.com/gorilla/websocket v1.5.0
+	gorm.io/gorm v1.24.6
+)
 
 require (
 	github.com/bytedance/sonic v1.8.0 // indirect

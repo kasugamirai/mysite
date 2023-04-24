@@ -1,3 +1,5 @@
+// routes/routes.go
+
 package routes
 
 import (
@@ -36,6 +38,11 @@ func SetupRouter() *gin.Engine {
 		orderGroup.DELETE("/:id", handlers.DeleteOrderHandler)
 		orderGroup.GET("/items/:orderID", handlers.GetOrderItemsByOrderIDHandler)
 	}
+
+	// Chat routes
+	router.GET("/ws", func(c *gin.Context) {
+		handlers.HandleConnections(c.Writer, c.Request)
+	})
 
 	return router
 }

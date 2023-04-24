@@ -1,3 +1,5 @@
+// main.go
+
 package main
 
 import (
@@ -6,6 +8,7 @@ import (
 
 	"xy.com/mysite/config"
 	"xy.com/mysite/database"
+	"xy.com/mysite/handlers"
 	"xy.com/mysite/routes"
 )
 
@@ -21,6 +24,10 @@ func main() {
 
 	// Set up the Gin router
 	router := routes.SetupRouter()
+
+	// Start the HandleMessages goroutine for chat functionality
+	go handlers.HandleMessages() // new add
+
 	// Start the server
 	port := config.Instance.Server.Port
 	if port == "" {
