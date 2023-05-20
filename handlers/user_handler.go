@@ -47,7 +47,7 @@ func GetUserHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, user.ID)
 }
 
 // GetUserByEmail Handlers fetching a user by Email.

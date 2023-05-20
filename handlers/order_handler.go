@@ -25,8 +25,19 @@ func CreateOrderHandler(c *gin.Context) {
 	c.JSON(http.StatusCreated, order)
 }
 
-// GetOrderHandler handles fetching an order by ID.
-func GetOrderHandler(c *gin.Context) {
+// GetAllOrdersHandler handles fetching all orders.
+func GetAllOrdersHandler(c *gin.Context) {
+	orders, err := models.GetAllOrders(database.DB)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"GetAllOrdersHandler": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, orders)
+}
+
+// GetOrderByIDHandler handles fetching an order by ID.
+func GetOrderByIDHandler(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

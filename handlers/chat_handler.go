@@ -26,7 +26,12 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer ws.Close()
+	defer func(ws *websocket.Conn) {
+		err := ws.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(ws)
 
 	clients[ws] = true
 
@@ -51,7 +56,10 @@ func HandleMessages() {
 			err := client.WriteJSON(msg)
 			if err != nil {
 				log.Printf("error: %v", err)
-				client.Close()
+				err := client.Close()
+				if err != nil {
+					return
+				}
 				delete(clients, client)
 			}
 		}

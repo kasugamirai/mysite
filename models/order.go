@@ -26,6 +26,17 @@ func CreateOrder(db *gorm.DB, order *Order) error {
 	return db.Create(order).Error
 }
 
+// GetAllOrders retrieves all orders from the database.
+func GetAllOrders(db *gorm.DB) ([]Order, error) {
+	var orders []Order
+
+	if err := db.Find(&orders).Error; err != nil {
+		return nil, err
+	}
+
+	return orders, nil
+}
+
 // GetOrderByID retrieves an order from the database by ID.
 func GetOrderByID(db *gorm.DB, id uint) (*Order, error) {
 	var order Order

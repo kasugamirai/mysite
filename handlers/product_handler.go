@@ -25,8 +25,8 @@ func CreateProductHandler(c *gin.Context) {
 	c.JSON(http.StatusCreated, product)
 }
 
-// GetProductHandler handles fetching a product by ID.
-func GetProductHandler(c *gin.Context) {
+// GetProductHandlerByID handles fetching a product by ID.
+func GetProductHandlerByID(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

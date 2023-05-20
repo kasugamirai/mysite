@@ -2,7 +2,6 @@ package models
 
 import (
 	"errors"
-
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -12,7 +11,7 @@ type User struct {
 	gorm.Model
 	Username string `gorm:"unique;not null" json:"username"`
 	Email    string `gorm:"unique;not null" json:"email"`
-	Password string `gorm:"not null" json:"-"`
+	Password string `gorm:"not null" json:"password"`
 }
 
 // CreateUser creates a new user in the database.
@@ -66,15 +65,14 @@ func DeleteUser(db *gorm.DB, id uint) error {
 }
 
 // AuthenticateUser checks if the provided password matches the stored password for the user.
-func AuthenticateUser(db *gorm.DB, username, password string) (*User, error) {
-	user, err := GetUserByUsername(db, username)
+func AuthenticateUser(db *gorm.DB, email, password string) (*User, error) {
+	user, err := GetUserByEmail(db, email)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("user not found")
 	}
-
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		return nil, errors.New("incorrect password")
+		return nil, err
 	}
 
 	return user, nil

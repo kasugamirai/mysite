@@ -31,9 +31,9 @@ func SetupRouter() *gin.Engine {
 	// Order routes
 	orderGroup := router.Group("/orders", middleware.AuthMiddleware())
 	{
-		orderGroup.GET("/getall", handlers.GetAllProductsHandler)
+		orderGroup.GET("/getAllOrders", handlers.GetAllOrdersHandler)
 		orderGroup.POST("/", handlers.CreateOrderHandler)
-		orderGroup.GET("/:id", handlers.GetOrderHandler)
+		orderGroup.GET("/:id", handlers.GetOrderByIDHandler)
 		orderGroup.GET("/user/:userID", handlers.GetOrdersByUserIDHandler)
 		orderGroup.PUT("/:id", handlers.UpdateOrderHandler)
 		orderGroup.DELETE("/:id", handlers.DeleteOrderHandler)
@@ -44,8 +44,8 @@ func SetupRouter() *gin.Engine {
 	productGroup := router.Group("/products", middleware.AuthMiddleware())
 	{
 		productGroup.POST("/", handlers.CreateProductHandler)
-		productGroup.GET("/:id", handlers.GetProductHandler)
-		productGroup.GET("/", handlers.GetAllProductsHandler)
+		productGroup.GET("/:id", handlers.GetProductHandlerByID)
+		productGroup.GET("/all", handlers.GetAllProductsHandler)
 		productGroup.PUT("/:id", handlers.UpdateProductHandler)
 		productGroup.DELETE("/:id", handlers.DeleteProductHandler)
 	}
