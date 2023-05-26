@@ -3,15 +3,15 @@ package handlers_test
 import (
 	"bytes"
 	"encoding/json"
-	"net/http"
-	"net/http/httptest"
-	"testing"
-	"xy.com/mysite/database"
-	"xy.com/mysite/models"
-
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"net/http"
+	"net/http/httptest"
+	"strconv"
+	"testing"
+	"xy.com/mysite/database"
 	"xy.com/mysite/handlers"
+	"xy.com/mysite/models"
 )
 
 func setupProductRouter() *gin.Engine {
@@ -84,4 +84,54 @@ func TestGetAllProductsHandler(t *testing.T) {
 
 	database.DB.Delete(product1)
 	database.DB.Delete(product2)
+}
+
+func TestGetProductHandlerByID(t *testing.T) {
+	setupTestData()
+	product := &models.Product{Name: "test", Price: 123.0}
+
+	database.DB.Create(product)
+	req, _ := http.NewRequest("GET", "/products/"+strconv.Itoa(int(product.ID)), nil)
+	w := httptest.NewRecorder()
+	router := setupProductRouter()
+	router.ServeHTTP(w, req)
+
+	var products models.Product
+	json.Unmarshal(w.Body.Bytes(), &products)
+	assert.Equal(t, product.ID, products.ID)
+
+	database.DB.Delete(product)
+}
+
+func TestUpdateProductHandler(t *testing.T) {
+	setupTestData()
+	product := &models.Product{Name: "origin", Price: 1.0}
+	updatedProduct := &models.Product{Name: "updated", Price: 2.0}
+
+	database.DB.Create(product)
+	productHJson, _ := json.Marshal(updatedProduct)
+	body := bytes.NewReader(productHJson)
+	req, _ := http.NewRequest("PUT", "/products/"+strconv.Itoa(int(product.ID)), body)
+	w := httptest.NewRecorder()
+	router := setupProductRouter()
+	router.ServeHTTP(w, req)
+
+	var newproduct models.Product
+	json.Unmarshal(w.Body.Bytes(), &newproduct)
+	assert.Equal(t, updatedProduct.Name, newproduct.Name)
+
+	database.DB.Delete(updatedProduct)
+}
+
+func TestDeleteProductHandler(t *testing.T) {
+	setupTestData()
+	product1 := &models.Product{Name: "test", Price: 1.0}
+
+	database.DB.Create(product1)
+	req, _ := http.NewRequest("DELETE", "/products/1", nil)
+	w := httptest.NewRecorder()
+	route := setupProductRouter()
+	route.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
 }
