@@ -1,15 +1,15 @@
-package handlers
+package user_handlers
 
 import (
 	"net/http"
 	"strconv"
 	"time"
+	"xy.com/mysite/models/user_models"
 
 	"github.com/dgrijalva/jwt-go"
 
 	"github.com/gin-gonic/gin"
 	"xy.com/mysite/database"
-	"xy.com/mysite/models"
 )
 
 type LoginInput struct {
@@ -19,13 +19,13 @@ type LoginInput struct {
 
 // CreateUserHandler handles the creation of a new user.
 func CreateUserHandler(c *gin.Context) {
-	var user models.User
+	var user user_models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := models.CreateUser(database.DB, &user); err != nil {
+	if err := user_models.CreateUser(database.DB, &user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -41,7 +41,7 @@ func GetUserHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := models.GetUserByID(database.DB, uint(id))
+	user, err := user_models.GetUserByID(database.DB, uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -58,7 +58,7 @@ func GetUserByEmailHandler(c *gin.Context) {
 		return
 	}
 
-	user, err := models.GetUserByEmail(database.DB, email)
+	user, err := user_models.GetUserByEmail(database.DB, email)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -75,14 +75,14 @@ func UpdateUserHandler(c *gin.Context) {
 		return
 	}
 
-	var user models.User
+	var user user_models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	user.ID = uint(id)
-	if err := models.UpdateUser(database.DB, &user); err != nil {
+	if err := user_models.UpdateUser(database.DB, &user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -98,7 +98,7 @@ func DeleteUserHandler(c *gin.Context) {
 		return
 	}
 
-	if err := models.DeleteUser(database.DB, uint(id)); err != nil {
+	if err := user_models.DeleteUser(database.DB, uint(id)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -113,7 +113,7 @@ func AuthenticateUserHandlers(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	user, err := models.AuthenticateUser(database.DB, loginInput.Email, loginInput.Password)
+	user, err := user_models.AuthenticateUser(database.DB, loginInput.Email, loginInput.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
@@ -137,7 +137,7 @@ func AuthenticateUserHandlers(c *gin.Context) {
 }
 
 // generateJWTToken creates a new JWT token for the user.
-func generateJWTToken(user *models.User, secret string, expirationTime time.Duration) (string, error) {
+func generateJWTToken(user *user_models.User, secret string, expirationTime time.Duration) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":  user.ID,
 		"exp": time.Now().Add(expirationTime).Unix(),

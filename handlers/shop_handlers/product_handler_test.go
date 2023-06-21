@@ -1,4 +1,4 @@
-package handlers_test
+package shop_handlers_test
 
 import (
 	"bytes"
@@ -10,26 +10,26 @@ import (
 	"strconv"
 	"testing"
 	"xy.com/mysite/database"
-	"xy.com/mysite/handlers"
-	"xy.com/mysite/models"
+	"xy.com/mysite/handlers/shop_handlers"
+	"xy.com/mysite/models/shop_models"
 )
 
 func setupProductRouter() *gin.Engine {
 	router := gin.Default()
 	productGroup := router.Group("/products")
 	{
-		productGroup.POST("/", handlers.CreateProductHandler)
-		productGroup.GET("/:id", handlers.GetProductHandlerByID)
-		productGroup.GET("/all", handlers.GetAllProductsHandler)
-		productGroup.PUT("/:id", handlers.UpdateProductHandler)
-		productGroup.DELETE("/:id", handlers.DeleteProductHandler)
+		productGroup.POST("/", shop_handlers.CreateProductHandler)
+		productGroup.GET("/:id", shop_handlers.GetProductHandlerByID)
+		productGroup.GET("/all", shop_handlers.GetAllProductsHandler)
+		productGroup.PUT("/:id", shop_handlers.UpdateProductHandler)
+		productGroup.DELETE("/:id", shop_handlers.DeleteProductHandler)
 	}
 	return router
 }
 
 func TestCreateProductHandler(t *testing.T) {
 	setupTestData()
-	product := models.Product{Name: "Test Product", Price: 10.0}
+	product := shop_models.Product{Name: "Test Product", Price: 10.0}
 	productJSON, _ := json.Marshal(product)
 
 	req, err := http.NewRequest("POST", "/products/", bytes.NewReader(productJSON))
@@ -42,7 +42,7 @@ func TestCreateProductHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusCreated, resp.Code)
 
-	var returnedProduct models.Product
+	var returnedProduct shop_models.Product
 	json.Unmarshal(resp.Body.Bytes(), &returnedProduct)
 	assert.Equal(t, product.Name, returnedProduct.Name)
 	assert.Equal(t, product.Price, returnedProduct.Price)
@@ -52,8 +52,8 @@ func TestCreateProductHandler(t *testing.T) {
 func TestGetAllProductsHandler(t *testing.T) {
 	setupTestData()
 
-	product1 := &models.Product{Name: "test1", Price: 10.0}
-	product2 := &models.Product{Name: "test2", Price: 20.0}
+	product1 := &shop_models.Product{Name: "test1", Price: 10.0}
+	product2 := &shop_models.Product{Name: "test2", Price: 20.0}
 	database.DB.Create(product1)
 	database.DB.Create(product2)
 
@@ -64,7 +64,7 @@ func TestGetAllProductsHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var products []models.Product
+	var products []shop_models.Product
 	json.Unmarshal(w.Body.Bytes(), &products)
 
 	foundProduct1 := false
@@ -88,7 +88,7 @@ func TestGetAllProductsHandler(t *testing.T) {
 
 func TestGetProductHandlerByID(t *testing.T) {
 	setupTestData()
-	product := &models.Product{Name: "test", Price: 123.0}
+	product := &shop_models.Product{Name: "test", Price: 123.0}
 
 	database.DB.Create(product)
 	req, _ := http.NewRequest("GET", "/products/"+strconv.Itoa(int(product.ID)), nil)
@@ -96,7 +96,7 @@ func TestGetProductHandlerByID(t *testing.T) {
 	router := setupProductRouter()
 	router.ServeHTTP(w, req)
 
-	var products models.Product
+	var products shop_models.Product
 	json.Unmarshal(w.Body.Bytes(), &products)
 	assert.Equal(t, product.ID, products.ID)
 
@@ -105,8 +105,8 @@ func TestGetProductHandlerByID(t *testing.T) {
 
 func TestUpdateProductHandler(t *testing.T) {
 	setupTestData()
-	product := &models.Product{Name: "origin", Price: 1.0}
-	updatedProduct := &models.Product{Name: "updated", Price: 2.0}
+	product := &shop_models.Product{Name: "origin", Price: 1.0}
+	updatedProduct := &shop_models.Product{Name: "updated", Price: 2.0}
 
 	database.DB.Create(product)
 	productHJson, _ := json.Marshal(updatedProduct)
@@ -116,7 +116,7 @@ func TestUpdateProductHandler(t *testing.T) {
 	router := setupProductRouter()
 	router.ServeHTTP(w, req)
 
-	var newproduct models.Product
+	var newproduct shop_models.Product
 	json.Unmarshal(w.Body.Bytes(), &newproduct)
 	assert.Equal(t, updatedProduct.Name, newproduct.Name)
 
@@ -125,7 +125,7 @@ func TestUpdateProductHandler(t *testing.T) {
 
 func TestDeleteProductHandler(t *testing.T) {
 	setupTestData()
-	product1 := &models.Product{Name: "test", Price: 1.0}
+	product1 := &shop_models.Product{Name: "test", Price: 1.0}
 
 	database.DB.Create(product1)
 	req, _ := http.NewRequest("DELETE", "/products/1", nil)

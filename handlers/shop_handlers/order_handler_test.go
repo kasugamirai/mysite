@@ -1,18 +1,17 @@
-package handlers_test
+package shop_handlers_test
 
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
 	"testing"
-
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
 	"xy.com/mysite/database"
-	"xy.com/mysite/handlers"
-	"xy.com/mysite/models"
+	"xy.com/mysite/handlers/shop_handlers"
+	"xy.com/mysite/models/shop_models"
 )
 
 func setupTestData() {
@@ -23,13 +22,13 @@ func setupRouter() *gin.Engine {
 	router := gin.Default()
 	orderGroup := router.Group("/orders")
 	{
-		orderGroup.POST("/", handlers.CreateOrderHandler)
-		orderGroup.GET("/getall", handlers.GetAllOrdersHandler)
-		orderGroup.GET("/:id", handlers.GetOrderByIDHandler)
-		orderGroup.GET("/user/:userID", handlers.GetOrdersByUserIDHandler)
-		orderGroup.PUT("/:id", handlers.UpdateOrderHandler)
-		orderGroup.DELETE("/:id", handlers.DeleteOrderHandler)
-		orderGroup.GET("/items/:orderID", handlers.GetOrderItemsByOrderIDHandler)
+		orderGroup.POST("/", shop_handlers.CreateOrderHandler)
+		orderGroup.GET("/getall", shop_handlers.GetAllOrdersHandler)
+		orderGroup.GET("/:id", shop_handlers.GetOrderByIDHandler)
+		orderGroup.GET("/user/:userID", shop_handlers.GetOrdersByUserIDHandler)
+		orderGroup.PUT("/:id", shop_handlers.UpdateOrderHandler)
+		orderGroup.DELETE("/:id", shop_handlers.DeleteOrderHandler)
+		orderGroup.GET("/items/:orderID", shop_handlers.GetOrderItemsByOrderIDHandler)
 	}
 
 	return router
@@ -38,7 +37,7 @@ func setupRouter() *gin.Engine {
 func TestCreateOrderHandler(t *testing.T) {
 	setupTestData()
 
-	newOrder := models.Order{
+	newOrder := shop_models.Order{
 		UserID:    1,
 		TotalCost: 100.0,
 	}
@@ -53,7 +52,7 @@ func TestCreateOrderHandler(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusCreated, w.Code)
-	var createdOrder models.Order
+	var createdOrder shop_models.Order
 	json.Unmarshal(w.Body.Bytes(), &createdOrder)
 	assert.Equal(t, newOrder.UserID, createdOrder.UserID)
 	assert.Equal(t, newOrder.TotalCost, createdOrder.TotalCost)
@@ -65,8 +64,8 @@ func TestCreateOrderHandler(t *testing.T) {
 func TestGetAllOrdersHandler(t *testing.T) {
 	setupTestData()
 
-	testOrder1 := models.Order{UserID: 1, TotalCost: 100.0}
-	testOrder2 := models.Order{UserID: 2, TotalCost: 200.0}
+	testOrder1 := shop_models.Order{UserID: 1, TotalCost: 100.0}
+	testOrder2 := shop_models.Order{UserID: 2, TotalCost: 200.0}
 	database.DB.Create(&testOrder1)
 	database.DB.Create(&testOrder2)
 
@@ -78,7 +77,7 @@ func TestGetAllOrdersHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var orders []models.Order
+	var orders []shop_models.Order
 	json.Unmarshal(w.Body.Bytes(), &orders)
 
 	foundTestOrder1 := false
@@ -104,7 +103,7 @@ func TestGetAllOrdersHandler(t *testing.T) {
 func TestGetOrderByIDHandler(t *testing.T) {
 	setupTestData()
 
-	testOrder := models.Order{UserID: 1, TotalCost: 100.0}
+	testOrder := shop_models.Order{UserID: 1, TotalCost: 100.0}
 	database.DB.Create(&testOrder)
 
 	req, _ := http.NewRequest("GET", "/orders/"+strconv.Itoa(int(testOrder.ID)), nil)
@@ -115,7 +114,7 @@ func TestGetOrderByIDHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var fetchedOrder models.Order
+	var fetchedOrder shop_models.Order
 	json.Unmarshal(w.Body.Bytes(), &fetchedOrder)
 	assert.Equal(t, testOrder.ID, fetchedOrder.ID)
 
@@ -128,9 +127,9 @@ func TestGetOrdersByUserIDHandler(t *testing.T) {
 
 	testUser1ID := uint(1)
 	testUser2ID := uint(2)
-	testOrder1 := models.Order{UserID: testUser1ID, TotalCost: 100.0}
-	testOrder2 := models.Order{UserID: testUser1ID, TotalCost: 200.0}
-	testOrder3 := models.Order{UserID: testUser2ID, TotalCost: 300.0}
+	testOrder1 := shop_models.Order{UserID: testUser1ID, TotalCost: 100.0}
+	testOrder2 := shop_models.Order{UserID: testUser1ID, TotalCost: 200.0}
+	testOrder3 := shop_models.Order{UserID: testUser2ID, TotalCost: 300.0}
 
 	database.DB.Create(&testOrder1)
 	database.DB.Create(&testOrder2)
@@ -144,7 +143,7 @@ func TestGetOrdersByUserIDHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var orders []models.Order
+	var orders []shop_models.Order
 	json.Unmarshal(w.Body.Bytes(), &orders)
 
 	assert.Equal(t, 2, len(orders))
@@ -158,10 +157,10 @@ func TestGetOrdersByUserIDHandler(t *testing.T) {
 func TestUpdateOrderHandler(t *testing.T) {
 	setupTestData()
 
-	testOrder := models.Order{UserID: 1, TotalCost: 100.0}
+	testOrder := shop_models.Order{UserID: 1, TotalCost: 100.0}
 	database.DB.Create(&testOrder)
 
-	updatedOrder := models.Order{
+	updatedOrder := shop_models.Order{
 		UserID:    testOrder.UserID,
 		TotalCost: 200.0,
 	}
@@ -176,7 +175,7 @@ func TestUpdateOrderHandler(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusOK, w.Code)
-	var fetchedOrder models.Order
+	var fetchedOrder shop_models.Order
 	json.Unmarshal(w.Body.Bytes(), &fetchedOrder)
 	assert.Equal(t, updatedOrder.TotalCost, fetchedOrder.TotalCost)
 
@@ -187,7 +186,7 @@ func TestUpdateOrderHandler(t *testing.T) {
 func TestDeleteOrderHandler(t *testing.T) {
 	setupTestData()
 
-	testOrder := models.Order{UserID: 1, TotalCost: 100.0}
+	testOrder := shop_models.Order{UserID: 1, TotalCost: 100.0}
 	database.DB.Create(&testOrder)
 
 	req, _ := http.NewRequest("DELETE", "/orders/"+strconv.Itoa(int(testOrder.ID)), nil)
@@ -198,7 +197,7 @@ func TestDeleteOrderHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var fetchedOrder models.Order
+	var fetchedOrder shop_models.Order
 	result := database.DB.First(&fetchedOrder, testOrder.ID)
 	assert.Error(t, result.Error)
 }
@@ -206,14 +205,14 @@ func TestDeleteOrderHandler(t *testing.T) {
 func TestGetOrderItemsByOrderIDHandler(t *testing.T) {
 	setupTestData()
 
-	testOrder := models.Order{UserID: 1, TotalCost: 100.0}
+	testOrder := shop_models.Order{UserID: 1, TotalCost: 100.0}
 	database.DB.Create(&testOrder)
 
-	testProduct := models.Product{Name: "Test Product", Price: 10.0}
+	testProduct := shop_models.Product{Name: "Test Product", Price: 10.0}
 	database.DB.Create(&testProduct)
 
-	testOrderItem1 := models.OrderItem{OrderID: testOrder.ID, ProductID: testProduct.ID, Quantity: 2, Price: 10.0}
-	testOrderItem2 := models.OrderItem{OrderID: testOrder.ID, ProductID: testProduct.ID, Quantity: 3, Price: 10.0}
+	testOrderItem1 := shop_models.OrderItem{OrderID: testOrder.ID, ProductID: testProduct.ID, Quantity: 2, Price: 10.0}
+	testOrderItem2 := shop_models.OrderItem{OrderID: testOrder.ID, ProductID: testProduct.ID, Quantity: 3, Price: 10.0}
 
 	database.DB.Create(&testOrderItem1)
 	database.DB.Create(&testOrderItem2)
@@ -226,7 +225,7 @@ func TestGetOrderItemsByOrderIDHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var orderItems []models.OrderItem
+	var orderItems []shop_models.OrderItem
 	json.Unmarshal(w.Body.Bytes(), &orderItems)
 
 	assert.Equal(t, 2, len(orderItems))

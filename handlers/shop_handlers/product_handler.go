@@ -1,23 +1,23 @@
-package handlers
+package shop_handlers
 
 import (
 	"net/http"
 	"strconv"
+	"xy.com/mysite/models/shop_models"
 
 	"github.com/gin-gonic/gin"
 	"xy.com/mysite/database"
-	"xy.com/mysite/models"
 )
 
 // CreateProductHandler handles the creation of a new product.
 func CreateProductHandler(c *gin.Context) {
-	var product models.Product
+	var product shop_models.Product
 	if err := c.ShouldBindJSON(&product); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := models.CreateProduct(database.DB, &product); err != nil {
+	if err := shop_models.CreateProduct(database.DB, &product); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -33,7 +33,7 @@ func GetProductHandlerByID(c *gin.Context) {
 		return
 	}
 
-	product, err := models.GetProductByID(database.DB, uint(id))
+	product, err := shop_models.GetProductByID(database.DB, uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -44,7 +44,7 @@ func GetProductHandlerByID(c *gin.Context) {
 
 // GetAllProductsHandler handles fetching all products.
 func GetAllProductsHandler(c *gin.Context) {
-	products, err := models.GetAllProducts(database.DB)
+	products, err := shop_models.GetAllProducts(database.DB)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -61,14 +61,14 @@ func UpdateProductHandler(c *gin.Context) {
 		return
 	}
 
-	var product models.Product
+	var product shop_models.Product
 	if err := c.ShouldBindJSON(&product); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	product.ID = uint(id)
-	if err := models.UpdateProduct(database.DB, &product); err != nil {
+	if err := shop_models.UpdateProduct(database.DB, &product); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -84,7 +84,7 @@ func DeleteProductHandler(c *gin.Context) {
 		return
 	}
 
-	if err := models.DeleteProduct(database.DB, uint(id)); err != nil {
+	if err := shop_models.DeleteProduct(database.DB, uint(id)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
