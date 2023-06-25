@@ -8,42 +8,48 @@ import (
 
 type ExchangedPrize struct {
 	gorm.Model
-	PrizeName string `json:"prize_name"`
-	UserID    string `json:"user_id"`
+	PrizeName      string `json:"prize_name"`
+	UserID         string `json:"user_id"`
+	RedemptionCode string `json:"redemption_code"`
 }
 
 // ExchangePrize 兑换奖品
-func ExchangePrize(db *gorm.DB, userID string, prizeName string, pointsSystem *PointsSystem) error {
+func ExchangePrize(db *gorm.DB, userID string, prizeName string, pointsSystem *PointsSystem) (string, error) {
 	prize, err := GetPrizeByName(db, prizeName)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	hasExchanged, err := CheckIfUserExchangedPrize(db, userID, prizeName)
 	if err != nil {
-		return err
+		return "", err
 	}
 	if hasExchanged {
 		// 用户已经兑换过这个奖品
-		return fmt.Errorf("user %s has already exchanged prize_handlers %s", userID, prizeName)
+		return "", fmt.Errorf("user %s has already exchanged prize %s", userID, prizeName)
 	}
 
 	// 用户还没有兑换过这个奖品，可以兑换
 	if pointsSystem.Points < prize.Cost {
-		return errors.New("insufficient points")
+		return "", errors.New("insufficient points")
 	}
-	pointsSystem.Points -= prize.Cost
-	if err := db.Save(pointsSystem).Error; err != nil {
-		return fmt.Errorf("failed to update points system: %w", err)
+	// 不再减少积分
+	// pointsSystem.Points -= prize.Cost
+
+	redemptionCode, err := GetCode(db)
+	if err != nil {
+		return "", fmt.Errorf("failed to get redemption code: %w", err)
 	}
+
 	exchangedPrize := ExchangedPrize{
-		PrizeName: prizeName,
-		UserID:    userID,
+		PrizeName:      prizeName,
+		UserID:         userID,
+		RedemptionCode: redemptionCode,
 	}
 	if err := db.Create(&exchangedPrize).Error; err != nil {
-		return fmt.Errorf("failed to save exchanged prize_handlers: %w", err)
+		return "", fmt.Errorf("failed to save exchanged prize: %w", err)
 	}
-	return nil
+	return redemptionCode, nil
 }
 
 // CheckIfUserExchangedPrize 检查用户是否已经兑换过这个奖品

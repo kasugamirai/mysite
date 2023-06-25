@@ -15,7 +15,7 @@ func setupDatabase() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	err = db.AutoMigrate(&Order{}, &OrderItem{}, &shop_models.Product{})
+	err = db.AutoMigrate(&shop_models.Order{}, &shop_models.OrderItem{}, &shop_models.Product{})
 	return db, err
 }
 
@@ -23,9 +23,9 @@ func TestCreateOrder(t *testing.T) {
 	db, err := setupDatabase()
 	require.NoError(t, err)
 
-	order := &Order{
+	order := &shop_models.Order{
 		UserID: 1,
-		OrderItems: []OrderItem{
+		OrderItems: []shop_models.OrderItem{
 			{
 				ProductID: 1,
 				Quantity:  2,
@@ -40,7 +40,7 @@ func TestCreateOrder(t *testing.T) {
 		TotalCost: 25.0,
 	}
 
-	err = CreateOrder(db, order)
+	err = shop_models.CreateOrder(db, order)
 	require.NoError(t, err)
 	assert.NotZero(t, order.ID)
 }
@@ -50,9 +50,9 @@ func TestGetOrderByID(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create a sample order
-	order := &Order{
+	order := &shop_models.Order{
 		UserID: 1,
-		OrderItems: []OrderItem{
+		OrderItems: []shop_models.OrderItem{
 			{
 				ProductID: 1,
 				Quantity:  2,
@@ -67,10 +67,10 @@ func TestGetOrderByID(t *testing.T) {
 		TotalCost: 25.0,
 	}
 
-	err = CreateOrder(db, order)
+	err = shop_models.CreateOrder(db, order)
 	require.NoError(t, err)
 
-	retrievedOrder, err := GetOrderByID(db, order.ID)
+	retrievedOrder, err := shop_models.GetOrderByID(db, order.ID)
 	require.NoError(t, err)
 	assert.NotNil(t, retrievedOrder)
 	assert.Equal(t, order.ID, retrievedOrder.ID)
@@ -83,9 +83,9 @@ func TestGetOrdersByUserID(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create a sample order
-	order := &Order{
+	order := &shop_models.Order{
 		UserID: 1,
-		OrderItems: []OrderItem{
+		OrderItems: []shop_models.OrderItem{
 			{
 				ProductID: 1,
 				Quantity:  2,
@@ -100,10 +100,10 @@ func TestGetOrdersByUserID(t *testing.T) {
 		TotalCost: 25.0,
 	}
 
-	err = CreateOrder(db, order)
+	err = shop_models.CreateOrder(db, order)
 	require.NoError(t, err)
 
-	orders, err := GetOrdersByUserID(db, order.UserID)
+	orders, err := shop_models.GetOrdersByUserID(db, order.UserID)
 	require.NoError(t, err)
 	assert.NotNil(t, orders)
 	assert.Len(t, orders, 1)
@@ -116,9 +116,9 @@ func TestUpdateOrder(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create a sample order
-	order := &Order{
+	order := &shop_models.Order{
 		UserID: 1,
-		OrderItems: []OrderItem{
+		OrderItems: []shop_models.OrderItem{
 			{
 				ProductID: 1,
 				Quantity:  2,
@@ -133,16 +133,16 @@ func TestUpdateOrder(t *testing.T) {
 		TotalCost: 25.0,
 	}
 
-	err = CreateOrder(db, order)
+	err = shop_models.CreateOrder(db, order)
 	require.NoError(t, err)
 
 	// Update the order
 	order.TotalCost = 30.0
-	err = UpdateOrder(db, order)
+	err = shop_models.UpdateOrder(db, order)
 	require.NoError(t, err)
 
 	// Retrieve the updated order
-	updatedOrder, err := GetOrderByID(db, order.ID)
+	updatedOrder, err := shop_models.GetOrderByID(db, order.ID)
 	require.NoError(t, err)
 
 	assert.Equal(t, order.TotalCost, updatedOrder.TotalCost)
@@ -153,9 +153,9 @@ func TestDeleteOrder(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create a sample order
-	order := &Order{
+	order := &shop_models.Order{
 		UserID: 1,
-		OrderItems: []OrderItem{
+		OrderItems: []shop_models.OrderItem{
 			{
 				ProductID: 1,
 				Quantity:  2,
@@ -170,15 +170,15 @@ func TestDeleteOrder(t *testing.T) {
 		TotalCost: 25.0,
 	}
 
-	err = CreateOrder(db, order)
+	err = shop_models.CreateOrder(db, order)
 	require.NoError(t, err)
 
 	// Delete the order
-	err = DeleteOrder(db, order.ID)
+	err = shop_models.DeleteOrder(db, order.ID)
 	require.NoError(t, err)
 
 	// Try to retrieve the deleted order
-	deletedOrder, err := GetOrderByID(db, order.ID)
+	deletedOrder, err := shop_models.GetOrderByID(db, order.ID)
 	assert.Error(t, err)
 	assert.Nil(t, deletedOrder)
 }
@@ -188,9 +188,9 @@ func TestGetOrderItemsByOrderID(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create a sample order
-	order := &Order{
+	order := &shop_models.Order{
 		UserID: 1,
-		OrderItems: []OrderItem{
+		OrderItems: []shop_models.OrderItem{
 			{
 				ProductID: 1,
 				Quantity:  2,
@@ -205,11 +205,11 @@ func TestGetOrderItemsByOrderID(t *testing.T) {
 		TotalCost: 25.0,
 	}
 
-	err = CreateOrder(db, order)
+	err = shop_models.CreateOrder(db, order)
 	require.NoError(t, err)
 
 	// Retrieve order items by order ID
-	orderItems, err := GetOrderItemsByOrderID(db, order.ID)
+	orderItems, err := shop_models.GetOrderItemsByOrderID(db, order.ID)
 	require.NoError(t, err)
 	assert.NotNil(t, orderItems)
 	assert.Len(t, orderItems, 2)

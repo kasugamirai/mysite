@@ -17,7 +17,15 @@ type PointsSystem struct {
 func GetPointsSystem(db *gorm.DB, userID string) (*PointsSystem, error) {
 	var pointsSystem PointsSystem
 	if err := db.Where("user_id = ?", userID).First(&pointsSystem).Error; err != nil {
-		return nil, err
+		if err == gorm.ErrRecordNotFound {
+			// User does not exist, create a new points system with zero points
+			pointsSystem = PointsSystem{UserID: userID, Points: 0, Coins: 0}
+			if err := db.Create(&pointsSystem).Error; err != nil {
+				return nil, fmt.Errorf("failed to create points system: %w", err)
+			}
+		} else {
+			return nil, err
+		}
 	}
 	return &pointsSystem, nil
 }
@@ -30,7 +38,7 @@ func UpdatePointsSystem(db *gorm.DB, pointsSystem *PointsSystem) error {
 	return nil
 }
 
-func (ps *PointsSystem) Draw() error {
+func (ps *PointsSystem) Draw(db *gorm.DB) error {
 	if ps.Points < 40000 {
 		// 积分低于40000时，100%概率获得1000积分
 		ps.Points += 1000
@@ -41,10 +49,15 @@ func (ps *PointsSystem) Draw() error {
 		return errors.New("积分已经超过50000，不能再抽奖")
 	}
 
+	// 更新积分系统到数据库
+	if err := UpdatePointsSystem(db, ps); err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (ps *PointsSystem) ExchangeCoins() error {
+func (ps *PointsSystem) ExchangeCoins(db *gorm.DB) error {
 	if ps.Coins < 100 {
 		// 金币不足100，不能兑换
 		return errors.New("金币不足，不能兑换")
@@ -53,6 +66,11 @@ func (ps *PointsSystem) ExchangeCoins() error {
 	// 每100金币可以兑换1积分
 	ps.Points += ps.Coins / 100
 	ps.Coins %= 100
+
+	// 更新积分系统到数据库
+	if err := UpdatePointsSystem(db, ps); err != nil {
+		return err
+	}
 
 	return nil
 }

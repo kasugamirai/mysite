@@ -20,7 +20,7 @@ func DrawHandler(c *gin.Context) {
 	}
 
 	// Perform the draw operation
-	if err := pointsSystem.Draw(); err != nil {
+	if err := pointsSystem.Draw(database.DB); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -31,10 +31,10 @@ func DrawHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Draw operation successful"})
+	c.JSON(http.StatusOK, gin.H{"message": "Draw operation successful", "point": pointsSystem})
 }
 
-// ExchangeHandler handles the exchange operation.
+// ExchangeCoinsHandler handles the exchange operation.
 func ExchangeCoinsHandler(c *gin.Context) {
 	userID := c.Param("userID")
 
@@ -46,7 +46,7 @@ func ExchangeCoinsHandler(c *gin.Context) {
 	}
 
 	// Perform the exchange operation
-	if err := pointsSystem.ExchangeCoins(); err != nil {
+	if err := pointsSystem.ExchangeCoins(database.DB); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

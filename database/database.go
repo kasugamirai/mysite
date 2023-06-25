@@ -43,6 +43,8 @@ func migrateModels() error {
 		&prize_models.Prize{},
 		&prize_models.ExchangedPrize{},
 		&prize_models.PointsSystem{},
+		&prize_models.Code{},
+		&prize_models.RedemptionCode{},
 	)
 	if err != nil {
 		return err

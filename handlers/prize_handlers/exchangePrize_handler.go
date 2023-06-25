@@ -28,13 +28,13 @@ func ExchangePrizeHandler(c *gin.Context) {
 	}
 
 	// Attempt to exchange the prize_handlers
-	err = prize_models.ExchangePrize(database.DB, req.UserID, req.PrizeName, pointsSystem)
+	code, err := prize_models.ExchangePrize(database.DB, req.UserID, req.PrizeName, pointsSystem)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Prize exchanged successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Prize exchanged successfully", "code": code})
 }
 
 // CheckIfUserExchangedPrizeHandler handles a request to check if a user has exchanged a specific prize_handlers.
