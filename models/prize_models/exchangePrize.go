@@ -13,67 +13,84 @@ type ExchangedPrize struct {
 	RedemptionCode string `json:"redemption_code"`
 }
 
-// ExchangePrize 兑换奖品
+// ExchangePrize exchanges a prize
 func ExchangePrize(db *gorm.DB, userID string, prizeName string, pointsSystem *PointsSystem) (string, error) {
+	// Check if the prize exists
 	prize, err := GetPrizeByName(db, prizeName)
 	if err != nil {
 		return "", err
 	}
 
+	// Check if the user has already exchanged this prize
 	hasExchanged, err := CheckIfUserExchangedPrize(db, userID, prizeName)
 	if err != nil {
 		return "", err
 	}
 	if hasExchanged {
-		// 用户已经兑换过这个奖品
+		// The user has already exchanged this prize
 		return "", fmt.Errorf("user %s has already exchanged prize %s", userID, prizeName)
 	}
 
-	// 用户还没有兑换过这个奖品，可以兑换
+	// The user has not exchanged this prize yet and can exchange it
 	if pointsSystem.Points < prize.Cost {
+		// The user does not have enough points to exchange the prize
 		return "", errors.New("insufficient points")
 	}
-	// 不再减少积分
-	// pointsSystem.Points -= prize.Cost
 
+	// Generate a redemption code
 	redemptionCode, err := GetCode(db)
 	if err != nil {
 		return "", fmt.Errorf("failed to get redemption code: %w", err)
 	}
 
+	// Create an ExchangedPrize record
 	exchangedPrize := ExchangedPrize{
 		PrizeName:      prizeName,
 		UserID:         userID,
 		RedemptionCode: redemptionCode,
 	}
+
+	// Save the ExchangedPrize to the database
 	if err := db.Create(&exchangedPrize).Error; err != nil {
 		return "", fmt.Errorf("failed to save exchanged prize: %w", err)
 	}
+
 	return redemptionCode, nil
 }
 
-// CheckIfUserExchangedPrize 检查用户是否已经兑换过这个奖品
+// CheckIfUserExchangedPrize checks if a user has already exchanged a prize
 func CheckIfUserExchangedPrize(db *gorm.DB, userID string, prizeName string) (bool, error) {
 	var exchangedPrize ExchangedPrize
-	if err := db.Where("user_id = ? AND prize_name = ?", userID, prizeName).First(&exchangedPrize).Error; err != nil {
+	err := db.Where("user_id = ? AND prize_name = ?", userID, prizeName).First(&exchangedPrize).Error
+
+	// If we get an error, and it's a ErrRecordNotFound, we return false (has not exchanged), and no error
+	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			// 用户还没有兑换过这个奖品
 			return false, nil
 		}
-		// 数据库错误
+
+		// If the error is something else, we return it
 		return false, fmt.Errorf("failed to query prize_handlers: %w", err)
 	}
-	// 用户已经兑换过这个奖品
+
+	// If we found a record, the user has already exchanged this prize
 	return true, nil
 }
 
 func GetPrizeByName(db *gorm.DB, prizeName string) (*Prize, error) {
 	var prize Prize
-	if err := db.Where("prize_name = ?", prizeName).First(&prize).Error; err != nil {
+	err := db.Where("prize_name = ?", prizeName).First(&prize).Error
+
+	if err != nil {
+		// We didn't find a record with the given prize name
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("prize_handlers not found: %s", prizeName)
 		}
+
+		// Some other error occurred
 		return nil, fmt.Errorf("failed to query prize_handlers: %w", err)
 	}
+
+	// We found a record, so we return it
 	return &prize, nil
 }

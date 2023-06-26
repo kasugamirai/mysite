@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-	"xy.com/mysite/models/prize_models"
 	"xy.com/mysite/models/user_models"
 
 	"github.com/dgrijalva/jwt-go"
@@ -30,25 +29,6 @@ func CreateUserHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	prizes := []struct {
-		name string
-		cost int
-	}{
-		{"Welcome prize 1", 10},
-		{"Welcome prize 2", 20},
-		{"Welcome prize 3", 30},
-		{"Welcome prize 4", 40},
-		{"Welcome prize 5", 50},
-	}
-
-	for _, p := range prizes {
-		if err := prize_models.AddPrize(database.DB, p.name, p.cost); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add prize: " + err.Error()})
-			return
-		}
-	}
-
 	c.JSON(http.StatusCreated, user)
 }
 

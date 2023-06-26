@@ -30,7 +30,7 @@ func TestExchangePrizeHandler(t *testing.T) {
 
 	// Setup data
 	userID := "testuser"
-	prizeName := "testprize"
+	prizeName := "Welcome prize 1"
 	cost := 100
 	initialPoints := 200
 

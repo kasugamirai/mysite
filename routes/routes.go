@@ -72,20 +72,16 @@ func SetupRouter() *gin.Engine {
 
 	exchangeGroup := router.Group("/exchange", middleware.AuthMiddleware())
 	{
-		exchangeGroup.POST("/exchangePrize", prize_handlers.ExchangePrizeHandler)
-		exchangeGroup.GET("/exchanded/:userID/:prizeName", prize_handlers.CheckIfUserExchangedPrizeHandler)
+		exchangeGroup.GET("/checkExchanged/:userID/:prizeName", prize_handlers.CheckIfUserExchangedPrizeHandler)
+		exchangeGroup.POST("/exchanged", prize_handlers.ExchangePrizeHandler)
 		exchangeGroup.GET("/prize_handlers/:prizeName", prize_handlers.GetPrizeByNameHandler)
 	}
 
-	codePollGroup := router.Group("/admin", middleware.AuthMiddleware())
+	adminGroup := router.Group("/admin", middleware.AuthMiddleware())
 	{
-		codePollGroup.POST("/addCode", prize_handlers.AddCodeHandler)
+		adminGroup.POST("/addCode", prize_handlers.AddCodeHandler)
+		adminGroup.POST("/addRedemptionCode", prize_handlers.AddRedemptionCodeHandler)
+		adminGroup.POST("/addPrize", prize_handlers.AddPrizeHandler)
 	}
-
-	RedemptionCodeGroup := router.Group("/Redemption")
-	{
-		RedemptionCodeGroup.POST("/addRedemptionCode", prize_handlers.AddRedemptionCodeHandler)
-	}
-
 	return router
 }
