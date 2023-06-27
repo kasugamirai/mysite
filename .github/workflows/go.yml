@@ -1,4 +1,4 @@
-name: Go
+name: Test Go Service
 
 on:
   push:
@@ -7,27 +7,24 @@ on:
     branches: [ main ]
 
 jobs:
-
   build:
-    name: Build
     runs-on: ubuntu-latest
-    steps:
 
-      - name: Set up Go 1.x
+    steps:
+      - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: ^1.20.3
-        id: go
+          go-version: 1.20.3
 
-      - name: Check out code into the Go module directory
+      - name: Check out code
         uses: actions/checkout@v2
 
       - name: Get dependencies
         run: go mod download
 
-      - name: Build
-        run: go build -v .
-
-      - name: run
+      - name: Run Service
         run: go run .
+        background: true
 
+      - name: Run Tests
+        run: go test ./...
