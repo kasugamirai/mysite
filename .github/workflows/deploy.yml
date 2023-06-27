@@ -21,20 +21,19 @@ jobs:
       - name: Build
         run: go build -o mysite
 
-      - name: Copy file via ssh passwordless
-        uses: appleboy/scp-action@master
+      - name: Copy file via ssh password
+        uses: mr-smithers-excellent/docker-build-push@v4
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          password: ${{ secrets.SSH_PASSWORD }} # 添加你的 SSH 密码
           source: "."
           target: "/mysite"
 
       - name: Execute remote ssh commands
-        uses: appleboy/ssh-action@master
+        uses: mr-smithers-excellent/docker-build-push@v4
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: "cd /mysite && setsid ./mysite &
-"
+          password: ${{ secrets.SSH_PASSWORD }} # 添加你的 SSH 密码
+          script: "cd /mysite && setsid ./mysite &"
