@@ -7,8 +7,7 @@ import (
 )
 
 type PointsSystem struct {
-	gorm.Model
-	UserID string `json:"user_id"`
+	UserID string `gorm:"primaryKey"` // Set UserID as primary key
 	Points int    `json:"points"`
 	Coins  int    `json:"coins"`
 }
