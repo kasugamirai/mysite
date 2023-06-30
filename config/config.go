@@ -24,8 +24,6 @@ var (
 
 // LoadConfig reads the configuration file and unmarshals it into Config struct.
 func LoadConfig() {
-	// Set default values
-	Instance.Server.Port = "8080"
 
 	// Load the configuration file
 	configFile, err := os.Open("config.json")
