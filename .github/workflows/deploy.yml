@@ -53,7 +53,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "./config.js"
+          source: "./config.json"
           target: "/mysite"
 
       - name: Execute remote ssh commands
