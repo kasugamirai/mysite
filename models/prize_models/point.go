@@ -38,14 +38,14 @@ func UpdatePointsSystem(db *gorm.DB, pointsSystem *PointsSystem) error {
 }
 
 func (ps *PointsSystem) Draw(db *gorm.DB) error {
-	if ps.Points < 40000 {
-		// 积分低于40000时，100%概率获得1000积分
+	if ps.Points < 90000 {
+		// 积分低于90000时，100%概率获得1000积分
 		ps.Points += 1000
-	} else if ps.Points >= 40000 && ps.Points < 50000 {
+	} else if ps.Points >= 90000 && ps.Points < 100000 {
 		// 积分高于40000时，每次抽奖获得金币
 		ps.Coins += 10
 	} else {
-		return errors.New("积分已经超过50000，不能再抽奖")
+		return errors.New("积分已经超过100000，不能再抽奖")
 	}
 
 	// 更新积分系统到数据库

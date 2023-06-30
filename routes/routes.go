@@ -13,6 +13,7 @@ import (
 
 func SetupRouter() *gin.Engine {
 	router := gin.Default()
+	SetupStaticRoutes(router)
 
 	// Auth routes
 	authGroup := router.Group("/auth")

@@ -19,7 +19,7 @@ jobs:
           go-version: 1.20.3
 
       - name: Build
-        run: go build -o mysite
+        run: go build -o backend
 
       - name: Check and stop running application
         uses: appleboy/ssh-action@master
@@ -27,7 +27,16 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: "pkill mysite || true"
+          script: "pkill backend || true"
+
+      - name: Check and delete existing application
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: "test -f /mysite/backend && rm /mysite/backend || true"
+
 
       - name: Copy file via ssh
         uses: appleboy/scp-action@master
@@ -35,7 +44,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "./mysite"
+          source: "./backend"
           target: "/mysite"
 
       - name: Execute remote ssh commands
@@ -44,4 +53,4 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: "cd /mysite && setsid ./mysite &"
+          script: "cd /mysite && setsid ./backend &"

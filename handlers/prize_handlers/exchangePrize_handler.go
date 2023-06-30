@@ -48,7 +48,16 @@ func CheckIfUserExchangedPrizeHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"hasExchanged": hasExchanged})
+	if hasExchanged {
+		code, err := prize_models.GetRedemptionCode(database.DB, userID, prizeName)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"hasExchanged": hasExchanged, "code": code})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"hasExchanged": hasExchanged})
+	}
 }
 
 // GetPrizeByNameHandler handles a request to get a prize_handlers by name.
@@ -62,4 +71,18 @@ func GetPrizeByNameHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, prize)
+}
+
+// GetRedemptionCodeHandler handles a request to get the redemption code for a specific user and prize.
+func GetRedemptionCodeHandler(c *gin.Context) {
+	userID := c.Param("userID")
+	prizeName := c.Param("prizeName")
+
+	code, err := prize_models.GetRedemptionCode(database.DB, userID, prizeName)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"redemptionCode": code})
 }

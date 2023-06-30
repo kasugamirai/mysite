@@ -26,9 +26,14 @@ func ExchangePrize(db *gorm.DB, userID string, prizeName string, pointsSystem *P
 	if err != nil {
 		return "", err
 	}
+
+	// If the user has already exchanged this prize, return the redemption code
 	if hasExchanged {
-		// The user has already exchanged this prize
-		return "", fmt.Errorf("user %s has already exchanged prize %s", userID, prizeName)
+		redemptionCode, err := GetRedemptionCode(db, userID, prizeName)
+		if err != nil {
+			return "", fmt.Errorf("failed to get redemption code: %w", err)
+		}
+		return redemptionCode, nil
 	}
 
 	// The user has not exchanged this prize yet and can exchange it
@@ -93,4 +98,23 @@ func GetPrizeByName(db *gorm.DB, prizeName string) (*Prize, error) {
 
 	// We found a record, so we return it
 	return &prize, nil
+}
+
+// GetRedemptionCode fetches the redemption code for a given user and prize
+func GetRedemptionCode(db *gorm.DB, userID string, prizeName string) (string, error) {
+	var exchangedPrize ExchangedPrize
+	err := db.Where("user_id = ? AND prize_name = ?", userID, prizeName).First(&exchangedPrize).Error
+
+	if err != nil {
+		// We didn't find a record with the given user ID and prize name
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", fmt.Errorf("exchanged prize not found for user %s and prize %s", userID, prizeName)
+		}
+
+		// Some other error occurred
+		return "", fmt.Errorf("failed to query exchanged prizes: %w", err)
+	}
+
+	// We found a record, so we return the redemption code
+	return exchangedPrize.RedemptionCode, nil
 }
