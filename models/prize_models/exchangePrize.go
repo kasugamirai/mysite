@@ -39,7 +39,7 @@ func ExchangePrize(db *gorm.DB, userID string, prizeName string, pointsSystem *P
 	// The user has not exchanged this prize yet and can exchange it
 	if pointsSystem.Points < prize.Cost {
 		// The user does not have enough points to exchange the prize
-		return "", errors.New("insufficient points")
+		return "", errors.New("insufficient points " + string(prize.Cost))
 	}
 
 	// Generate a redemption code
