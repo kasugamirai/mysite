@@ -12,7 +12,7 @@ import (
 var clients = make(map[*websocket.Conn]bool)
 var broadcast = make(chan Message)
 
-var upgrader = websocket.Upgrader{}
+var upGrader = websocket.Upgrader{}
 
 type Message struct {
 	Email    string `json:"email"`
@@ -22,7 +22,7 @@ type Message struct {
 
 // HandleConnections Connect To Server
 func HandleConnections(w http.ResponseWriter, r *http.Request) {
-	ws, err := upgrader.Upgrade(w, r, nil)
+	ws, err := upGrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -35,7 +35,17 @@ func AuthMiddleware() gin.HandlerFunc {
 			return []byte(secret), nil
 		})
 
-		if err != nil || !token.Valid {
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			c.Abort()
+			return
+		}
+
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if ok && token.Valid {
+			// Set the userID in the Gin context.
+			c.Set("userID", uint(claims["id"].(float64)))
+		} else {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			c.Abort()
 			return
