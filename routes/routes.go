@@ -73,7 +73,7 @@ func SetupRouter() *gin.Engine {
 
 	exchangeGroup := router.Group("/exchange", middleware.AuthMiddleware())
 	{
-		exchangeGroup.GET("/checkExchanged/:userID/:prizeName", prize_handlers.CheckIfUserExchangedPrizeHandler)
+		exchangeGroup.GET("/checkExchanged/:prizeName", prize_handlers.CheckIfUserExchangedPrizeHandler)
 		exchangeGroup.POST("/exchanged", prize_handlers.ExchangePrizeHandler)
 		exchangeGroup.GET("/prize_handlers/:prizeName", prize_handlers.GetPrizeByNameHandler)
 	}
