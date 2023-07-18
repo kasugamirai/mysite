@@ -36,10 +36,22 @@ func DrawHandler(c *gin.Context) {
 
 // ExchangeCoinsHandler handles the exchange operation.
 func ExchangeCoinsHandler(c *gin.Context) {
-	userID := c.Param("userID")
+	// Get the userID from the Gin context
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	// Convert the userID to the desired type (e.g., string)
+	userIDStr, ok := userID.(string)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get userID"})
+		return
+	}
 
 	// Fetch user's points system
-	pointsSystem, err := prize_models.GetPointsSystem(database.DB, userID)
+	pointsSystem, err := prize_models.GetPointsSystem(database.DB, userIDStr)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

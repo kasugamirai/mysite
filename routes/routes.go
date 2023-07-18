@@ -63,7 +63,7 @@ func SetupRouter() *gin.Engine {
 	{
 		pointGroup.GET("/points/:userID", prize_handlers.GetPointsSystemHandler)
 		pointGroup.POST("/draw/:userID", middleware.CheckRedemptionCode(), prize_handlers.DrawHandler)
-		pointGroup.POST("/exchange/:userID", prize_handlers.ExchangeCoinsHandler)
+		pointGroup.POST("/exchange/", prize_handlers.ExchangeCoinsHandler)
 	}
 
 	prizeGroup := router.Group("/prize_handlers", middleware.AuthMiddleware())
