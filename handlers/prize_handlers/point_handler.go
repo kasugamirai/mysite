@@ -2,6 +2,7 @@ package prize_handlers
 
 import (
 	"net/http"
+	"strconv"
 	"xy.com/mysite/database"
 	"xy.com/mysite/models/prize_models"
 
@@ -16,12 +17,15 @@ func getUserID(c *gin.Context) (string, bool) {
 		return "", false
 	}
 
-	// Convert the userID to the desired type (e.g., string)
-	userIDStr, ok := userID.(string)
+	// Ensure the userID is of type uint64 before converting it
+	userIDUint, ok := userID.(uint64)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get userID"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "userID is not of type uint64"})
 		return "", false
 	}
+
+	// Convert the userID to a string
+	userIDStr := strconv.FormatUint(userIDUint, 10)
 
 	return userIDStr, true
 }
