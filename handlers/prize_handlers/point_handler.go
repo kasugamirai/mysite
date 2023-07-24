@@ -1,46 +1,40 @@
 package prize_handlers
 
 import (
-	"log"
 	"net/http"
-	"strconv"
 	"xy.com/mysite/database"
 	"xy.com/mysite/models/prize_models"
 
 	"github.com/gin-gonic/gin"
 )
 
-func getUserID(c *gin.Context) (string, bool) {
+func getUserID(c *gin.Context) (uint, bool) {
 	// Get the userID from the Gin context
 	userID, exists := c.Get("userID")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-		return "", false
+		return 0, false
 	}
-	log.Println("userID:", userID)
 
-	// Ensure the userID is of type uint64 before converting it
-	userIDUint, ok := userID.(uint64)
+	// Ensure the userID is of type uint before returning it
+	userIDUint, ok := userID.(uint)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "userID is not of type uint64"})
-		return "", false
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "userID is not of type uint"})
+		return 0, false
 	}
 
-	// Convert the userID to a string
-	userIDStr := strconv.FormatUint(userIDUint, 10)
-
-	return userIDStr, true
+	return userIDUint, true
 }
 
 // DrawHandler handles the draw operation.
 func DrawHandler(c *gin.Context) {
-	userIDStr, ok := getUserID(c)
+	userID, ok := getUserID(c)
 	if !ok {
 		return
 	}
 
 	// Fetch user's points system
-	pointsSystem, err := prize_models.GetPointsSystem(database.DB, userIDStr)
+	pointsSystem, err := prize_models.GetPointsSystem(database.DB, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -63,13 +57,13 @@ func DrawHandler(c *gin.Context) {
 
 // ExchangeCoinsHandler handles the exchange operation.
 func ExchangeCoinsHandler(c *gin.Context) {
-	userIDStr, ok := getUserID(c)
+	userID, ok := getUserID(c)
 	if !ok {
 		return
 	}
 
 	// Fetch user's points system
-	pointsSystem, err := prize_models.GetPointsSystem(database.DB, userIDStr)
+	pointsSystem, err := prize_models.GetPointsSystem(database.DB, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -92,13 +86,13 @@ func ExchangeCoinsHandler(c *gin.Context) {
 
 // GetPointsSystemHandler handles fetching the points system for a specific user.
 func GetPointsSystemHandler(c *gin.Context) {
-	userIDStr, ok := getUserID(c)
+	userID, ok := getUserID(c)
 	if !ok {
 		return
 	}
 
 	// Fetch user's points system
-	pointsSystem, err := prize_models.GetPointsSystem(database.DB, userIDStr)
+	pointsSystem, err := prize_models.GetPointsSystem(database.DB, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

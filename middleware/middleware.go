@@ -44,15 +44,15 @@ func AuthMiddleware() gin.HandlerFunc {
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if ok && token.Valid {
 			// Check if the "id" exists and is a float64.
-			id, ok := claims["id"].(float64)
-			if !ok {
+			idFloat, ok := claims["id"].(float64)
+			if !ok || idFloat < 0 || idFloat > float64(^uint(0)) {
 				c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid user ID in token"})
 				c.Abort()
 				return
 			}
 
 			// Set the userID in the Gin context.
-			c.Set("userID", uint(id))
+			c.Set("userID", uint(idFloat))
 		} else {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			c.Abort()

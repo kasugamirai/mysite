@@ -7,13 +7,13 @@ import (
 )
 
 type PointsSystem struct {
-	UserID string `gorm:"primaryKey"` // Set UserID as primary key
-	Points int    `json:"points"`
-	Coins  int    `json:"coins"`
+	UserID uint `gorm:"primaryKey"` // Set UserID as primary key
+	Points int  `json:"points"`
+	Coins  int  `json:"coins"`
 }
 
 // 通过用户ID获取积分系统
-func GetPointsSystem(db *gorm.DB, userID string) (*PointsSystem, error) {
+func GetPointsSystem(db *gorm.DB, userID uint) (*PointsSystem, error) {
 	var pointsSystem PointsSystem
 	if err := db.Where("user_id = ?", userID).First(&pointsSystem).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
