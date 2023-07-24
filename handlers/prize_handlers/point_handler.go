@@ -1,6 +1,7 @@
 package prize_handlers
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 	"xy.com/mysite/database"
@@ -16,11 +17,12 @@ func getUserID(c *gin.Context) (string, bool) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return "", false
 	}
+	log.Println("userID:", userID)
 
 	// Ensure the userID is of type uint64 before converting it
 	userIDUint, ok := userID.(uint64)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "userID is not of type uint64" + userID.(string)})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "userID is not of type uint64"})
 		return "", false
 	}
 
