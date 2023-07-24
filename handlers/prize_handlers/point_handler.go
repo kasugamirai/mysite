@@ -1,6 +1,7 @@
 package prize_handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"xy.com/mysite/database"
@@ -19,6 +20,7 @@ func getUserID(c *gin.Context) (string, bool) {
 
 	// Ensure the userID is of type uint64 before converting it
 	userIDUint, ok := userID.(uint64)
+	fmt.Print(userIDUint)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "userID is not of type uint64"})
 		return "", false
