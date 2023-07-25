@@ -11,16 +11,8 @@ import (
 // ExchangePrizeHandler handles the exchange of a prize.
 func ExchangePrizeHandler(c *gin.Context) {
 	// Get the userID from the Gin context
-	userID, exists := c.Get("userID")
+	userID, exists := getUserID(c)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-		return
-	}
-
-	// Convert the userID to the desired type (e.g., string)
-	userIDStr, ok := userID.(string)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get userID"})
 		return
 	}
 
@@ -34,14 +26,14 @@ func ExchangePrizeHandler(c *gin.Context) {
 	}
 
 	// Fetch user's points system
-	pointsSystem, err := prize_models.GetPointsSystem(database.DB, userIDStr)
+	pointsSystem, err := prize_models.GetPointsSystem(database.DB, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	// Attempt to exchange the prize
-	code, err := prize_models.ExchangePrize(database.DB, userIDStr, req.PrizeName, pointsSystem)
+	code, err := prize_models.ExchangePrize(database.DB, userID, req.PrizeName, pointsSystem)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -9,12 +9,12 @@ import (
 type ExchangedPrize struct {
 	gorm.Model
 	PrizeName      string `json:"prize_name"`
-	UserID         string `json:"user_id"`
+	UserID         uint   `json:"user_id"`
 	RedemptionCode string `json:"redemption_code"`
 }
 
 // ExchangePrize exchanges a prize
-func ExchangePrize(db *gorm.DB, userID string, prizeName string, pointsSystem *PointsSystem) (string, error) {
+func ExchangePrize(db *gorm.DB, userID uint, prizeName string, pointsSystem *PointsSystem) (string, error) {
 	// Check if the prize exists
 	prize, err := GetPrizeByName(db, prizeName)
 	if err != nil {
@@ -64,7 +64,7 @@ func ExchangePrize(db *gorm.DB, userID string, prizeName string, pointsSystem *P
 }
 
 // CheckIfUserExchangedPrize checks if a user has already exchanged a prize
-func CheckIfUserExchangedPrize(db *gorm.DB, userID string, prizeName string) (bool, error) {
+func CheckIfUserExchangedPrize(db *gorm.DB, userID uint, prizeName string) (bool, error) {
 	var exchangedPrize ExchangedPrize
 	err := db.Where("user_id = ? AND prize_name = ?", userID, prizeName).First(&exchangedPrize).Error
 
@@ -101,7 +101,7 @@ func GetPrizeByName(db *gorm.DB, prizeName string) (*Prize, error) {
 }
 
 // GetRedemptionCode fetches the redemption code for a given user and prize
-func GetRedemptionCode(db *gorm.DB, userID string, prizeName string) (string, error) {
+func GetRedemptionCode(db *gorm.DB, userID uint, prizeName string) (string, error) {
 	var exchangedPrize ExchangedPrize
 	err := db.Where("user_id = ? AND prize_name = ?", userID, prizeName).First(&exchangedPrize).Error
 
