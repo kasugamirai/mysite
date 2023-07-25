@@ -44,30 +44,21 @@ func ExchangePrizeHandler(c *gin.Context) {
 
 // CheckIfUserExchangedPrizeHandler handles a request to check if a user has exchanged a specific prize.
 func CheckIfUserExchangedPrizeHandler(c *gin.Context) {
-	// Get the userID from the Gin context
-	userID, exists := c.Get("userID")
+	userID, exists := getUserID(c)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-		return
-	}
-
-	// Convert the userID to the desired type (e.g., string)
-	userIDStr, ok := userID.(string)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get userID"})
 		return
 	}
 
 	prizeName := c.Param("prizeName")
 
-	hasExchanged, err := prize_models.CheckIfUserExchangedPrize(database.DB, userIDStr, prizeName)
+	hasExchanged, err := prize_models.CheckIfUserExchangedPrize(database.DB, userID, prizeName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	if hasExchanged {
-		code, err := prize_models.GetRedemptionCode(database.DB, userIDStr, prizeName)
+		code, err := prize_models.GetRedemptionCode(database.DB, userID, prizeName)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -94,22 +85,14 @@ func GetPrizeByNameHandler(c *gin.Context) {
 // GetRedemptionCodeHandler handles a request to get the redemption code for a specific user and prize.
 func GetRedemptionCodeHandler(c *gin.Context) {
 	// Get the userID from the Gin context
-	userID, exists := c.Get("userID")
+	userID, exists := getUserID(c)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-		return
-	}
-
-	// Convert the userID to the desired type (e.g., string)
-	userIDStr, ok := userID.(string)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get userID"})
 		return
 	}
 
 	prizeName := c.Param("prizeName")
 
-	code, err := prize_models.GetRedemptionCode(database.DB, userIDStr, prizeName)
+	code, err := prize_models.GetRedemptionCode(database.DB, userID, prizeName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
